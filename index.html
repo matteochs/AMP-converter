@@ -49,7 +49,6 @@
       const output = document.getElementById("results");
       output.textContent = "Caricamento...";
 
-      // CORS proxy
       const proxy = "https://corsproxy.io/?";
       const proxiedUrl = proxy + encodeURIComponent(url);
 
@@ -57,12 +56,12 @@
         const res = await fetch(proxiedUrl);
         const text = await res.text();
 
-        const matches = [...text.matchAll(/https?:\/\/[\w\.\/-_%]+\.s?html/g)];
+        const matches = [...text.matchAll(/https?:\/\/[\w\.-]+\/[\w\./-]*?\.s?html/g)];
         const links = matches.map(m => m[0]);
 
         const filtered = links.filter(link =>
           (link.includes("corriere.it") || link.includes("gazzetta.it")) &&
-          keywords.some(kw => link.toLowerCase().includes(kw))
+          (keywords.length === 0 || keywords.some(kw => link.toLowerCase().includes(kw)))
         );
 
         const ampLinks = filtered.map(link =>
