@@ -1,25 +1,26 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Estrattore AMP per Corriere & Gazzetta</title>
+  <title>AMP Extractor con CORS Proxy</title>
   <style>
-    body { font-family: sans-serif; margin: 2em; }
+    body { font-family: sans-serif; margin: 2em; max-width: 700px; }
     input, button { margin: 0.5em 0; padding: 0.5em; width: 100%; }
+    #filters span { background: #eee; margin: 0 5px; padding: 3px 6px; border-radius: 4px; }
     #results { margin-top: 1em; white-space: pre-wrap; background: #f2f2f2; padding: 1em; }
   </style>
 </head>
 <body>
-  <h1>Estrattore AMP per Corriere & Gazzetta</h1>
-  <label>URL della sezione</label>
+  <h1>Estrattore AMP (Corriere + Gazzetta) via CORS Proxy</h1>
+
+  <label>URL della sezione (es: https://www.corriere.it/esteri/)</label>
   <input type="text" id="sectionUrl" placeholder="https://www.corriere.it/...">
-  
+
   <h3>Parole chiave per filtrare (OR)</h3>
   <div id="filters"></div>
   <input type="text" id="keywordInput" placeholder="es. sanremo">
   <button onclick="addKeyword()">+ Aggiungi parola chiave</button>
-  
+
   <button onclick="extractLinks()">Estrai link AMP</button>
   <button onclick="copyToClipboard()">Copia negli appunti</button>
 
@@ -28,6 +29,7 @@
 
   <script>
     let keywords = [];
+
     function addKeyword() {
       const input = document.getElementById("keywordInput");
       if (input.value.trim()) {
@@ -47,10 +49,15 @@
       const output = document.getElementById("results");
       output.textContent = "Caricamento...";
 
+      // CORS proxy
+      const proxy = "https://corsproxy.io/?";
+      const proxiedUrl = proxy + encodeURIComponent(url);
+
       try {
-        const res = await fetch(url);
+        const res = await fetch(proxiedUrl);
         const text = await res.text();
-        const matches = [...text.matchAll(/https?:\/\/[\w\.\/\-%]+\.s?html/g)];
+
+        const matches = [...text.matchAll(/https?:\/\/[\w\.\/-_%]+\.s?html/g)];
         const links = matches.map(m => m[0]);
 
         const filtered = links.filter(link =>
